@@ -24,3 +24,22 @@
     position: absolute;
     bottom: 0;
 }
+
+.service-feedback {
+    border-radius: 5px;
+    margin-top: 5px;
+    padding: 5px;
+    font-size: small;
+}
+
+.optional-note {
+    background: rgba(255, 164, 46, 0.7);
+}
+
+.execution-modalities-note {
+    background: rgba(255, 164, 46, 0.7);
+}
+
+.requirements-note {
+    background: rgba(255, 164, 46, 0.7);
+}

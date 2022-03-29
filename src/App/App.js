@@ -17,6 +17,9 @@ import SustainabilityExtension from './SustainabilityExtension';
 
 import { Button, KIND } from 'baseui/button';
 
+import { SustainableApplicationModel } from 'cloud-native-sustainability';
+import { SustainabilityFeedback } from './SustainabilityFeedback';
+
 const HIGH_PRIORITY = 1500;
 
 const options = { format: true }
@@ -25,7 +28,13 @@ class App extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            feedback: {
+                "sustainability awareness": 0,
+                "microservice classification": 0,
+                "microservice enrichment": 0
+            }
+        }
         this.canvas = React.createRef();
         this.propertiesPanel = React.createRef();
     }
@@ -51,6 +60,13 @@ class App extends React.Component {
             ]
         });
 
+        this.modeler.on('elements.changed', HIGH_PRIORITY, (event) => {
+            (async () => {
+                const { xml: current } = await this.modeler.saveXML(options);
+                this.handleUpdate(current);
+            })();
+        })
+
         this.modeler.on('element.click', HIGH_PRIORITY, (event) => {
             const businessObject = getBusinessObject(event.element);
             console.log(businessObject);
@@ -73,26 +89,79 @@ class App extends React.Component {
         const previous = prevProps.model || prevState.model;
 
         if (current && current !== previous) {
-            return this.displayModel(current);
+
+            this.handleLoading();
+
+            (async () => {
+                try {
+                    const {
+                        warnings
+                    } = await this.modeler.importXML(current);
+                } catch (error) {
+                    const {
+                        warnings
+                    } = error;
+                    warnings.forEach(warning => {
+                        this.handleError(`${warning.error}`);
+                    });
+                }
+
+                this.handleUpdate(current)
+            })();
         }
     }
 
-    async displayModel(model) {
+    async handleUpdate(current) {
 
-        this.handleLoading();
+        this.model = new SustainableApplicationModel(current);
 
-        try {
+        const {
+            overall,
+            services
+        } = await this.model.feedback;
+
+        this.setState({
+            feedback: overall
+        });
+
+        let overlays = this.modeler.get('overlays');
+
+        for (const [id, service] of Object.entries(services)) {
+            overlays.remove({ element: `${id}` });
+
             const {
-                warnings
-            } = await this.modeler.importXML(model);
-        } catch (error) {
-            const {
-                warnings
-            } = error;
-            warnings.forEach(warning => {
-                this.handleError(`${warning.error}`);
-            });
-        }
+                ["optional metadata"]: optional,
+                ["execution modalities"]: modalities,
+                ["total requirements"]: requirements
+            } = service;
+
+            if (!optional) {
+                overlays.add(`${id}`, 'optional-note', {
+                    position: {
+                        bottom: 0,
+                    },
+                    html: `<div class='service-feedback optional-note'>Missing optional metadata</div>`
+                });
+            }
+
+            if (!(modalities > 1)) {
+                overlays.add(`${id}`, 'execution-modalities-note', {
+                    position: {
+                        bottom: optional ? 0 : -60,
+                    },
+                    html: `<div class='service-feedback execution-modalities-note'>Missing execution modalities metadata</div>`
+                });
+            }
+
+            if (!(requirements > 1)) {
+                overlays.add(`${id}`, 'requirements-note', {
+                    position: {
+                        bottom: (modalities > 1) ? (optional ? 0 : -60) : (optional ? -76 : -136),
+                    },
+                    html: `<div class='service-feedback requirements-note'>Missing requirements metadata</div>`
+                });
+            }
+        };
     }
 
     uploadModel = (event) => {
@@ -157,7 +226,7 @@ class App extends React.Component {
 
     render() {
         return (
-            <div style={{ height: '100%', position: 'relative' }}>
+            <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
                 <div className='canvas' id='js-canvas' ref={this.canvas} />
                 <div className='properties-panel' id='js-properties-panel' ref={this.propertiesPanel} />
                 <div className='button-container'>
@@ -165,6 +234,7 @@ class App extends React.Component {
                     <input id='file-input' type='file' accept='text/bpmn' onChange={this.uploadModel} hidden />
                     <Button className='download-button' kind={KIND.secondary} onClick={this.downloadModel}>Download Model</Button>
                 </div>
+                <SustainabilityFeedback feedback={this.state.feedback} />
             </div>
         );
     }
