@@ -22,12 +22,12 @@ function ServiceIdentifier(props) {
     const debounce = useService('debounceInput');
 
     const getValue = () => {
-        return element.businessObject.serviceIdentifier || '';
+        return element.businessObject.serviceId || '';
     }
 
     const setValue = value => {
         return modeling.updateProperties(element, {
-            serviceIdentifier: value
+            serviceId: value
         });
     }
 

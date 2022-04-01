@@ -10,7 +10,7 @@
       ],
       "properties": [
         {
-          "name": "serviceIdentifier",
+          "name": "serviceId",
           "isAttr": true,
           "type": "String"
         },
