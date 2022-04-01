@@ -1,3 +1,3 @@
-import { SustainabilityFeedback } from './SustainabilityFeedback.js'
+import { SustainabilityFeedback } from './SustainabilityFeedback'
 
 export { SustainabilityFeedback };
