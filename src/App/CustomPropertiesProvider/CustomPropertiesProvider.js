@@ -1,3 +1,4 @@
+import serviceIdentifierProps from './props/ServiceIdentifierProps';
 import metadataProps from './props/MetadataProps';
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
@@ -21,7 +22,7 @@ export default function CustomPropertiesProvider(propertiesPanel, translate) {
    *
    * @return {(Object[]) => (Object[])} groups middleware
    */
-  this.getGroups = function(element) {
+  this.getGroups = function (element) {
 
     /**
      * We return a middleware that modifies
@@ -31,10 +32,15 @@ export default function CustomPropertiesProvider(propertiesPanel, translate) {
      *
      * @return {Object[]} modified groups
      */
-    return function(groups) {
+    return function (groups) {
+
+      // Add the "Service Identifier" group
+      if (is(element, 'bpmn:ServiceTask')) {
+        groups.push(createServiceIdentifierGroup(element, translate));
+      }
 
       // Add the "Metadata" group
-      if(is(element, 'bpmn:ServiceTask')) {
+      if (is(element, 'bpmn:ServiceTask')) {
         groups.push(createMetadataGroup(element, translate));
       }
 
@@ -48,7 +54,20 @@ export default function CustomPropertiesProvider(propertiesPanel, translate) {
   propertiesPanel.registerProvider(LOW_PRIORITY, this);
 }
 
-CustomPropertiesProvider.$inject = [ 'propertiesPanel', 'translate' ];
+CustomPropertiesProvider.$inject = ['propertiesPanel', 'translate'];
+
+// Create the custom Service Identifier group
+function createServiceIdentifierGroup(element, translate) {
+
+  // create a group called "Metadata".
+  const serviceIdentifierGroup = {
+    id: 'serviceIdentifier',
+    label: translate('Service Identifier'),
+    entries: serviceIdentifierProps(element)
+  };
+
+  return serviceIdentifierGroup
+}
 
 // Create the custom Metadata group
 function createMetadataGroup(element, translate) {

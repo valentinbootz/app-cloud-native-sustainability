@@ -10,6 +10,11 @@
       ],
       "properties": [
         {
+          "name": "serviceIdentifier",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "optional",
           "isAttr": true,
           "type": "Boolean"
