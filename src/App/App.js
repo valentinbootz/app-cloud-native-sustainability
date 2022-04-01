@@ -16,6 +16,7 @@ import CustomPropertiesProviderModule from './CustomPropertiesProvider';
 import SustainabilityExtension from './SustainabilityExtension';
 
 import { Button, KIND } from 'baseui/button';
+import { ArrowUp, ArrowDown, Upload } from "baseui/icon";
 
 import { SustainableApplicationModel } from 'cloud-native-sustainability';
 import { SustainabilityFeedback } from './SustainabilityFeedback';
@@ -60,7 +61,10 @@ class App extends React.Component {
             ]
         });
 
+        this.modeler.createDiagram();
+
         this.modeler.on('elements.changed', HIGH_PRIORITY, (event) => {
+            event.preventDefault();
             (async () => {
                 const { xml: current } = await this.modeler.saveXML(options);
                 this.handleUpdate(current);
@@ -77,48 +81,40 @@ class App extends React.Component {
         this.modeler.destroy();
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    async importModel(model) {
 
-        const {
-            props,
-            state
-        } = this;
+        this.handleLoading();
 
-        const current = props.model || state.model;
+        const { xml: current } = await this.modeler.saveXML(options);
 
-        const previous = prevProps.model || prevState.model;
-
-        if (current && current !== previous) {
-
-            this.handleLoading();
-
-            (async () => {
-                try {
-                    const {
-                        warnings
-                    } = await this.modeler.importXML(current);
-                } catch (error) {
-                    const {
-                        warnings
-                    } = error;
-                    warnings.forEach(warning => {
-                        this.handleError(`${warning.error}`);
-                    });
-                }
-
-                this.handleUpdate(current)
-            })();
+        this.modeler.createDiagram();
+        try {
+            const {
+                warnings
+            } = await this.modeler.importXML(model);
+        } catch (error) {
+            const {
+                warnings
+            } = error;
+            warnings.forEach(warning => {
+                this.handleError(`${warning.error}`);
+            });
+            this.modeler.importXML(current);
         }
+
+        this.handleUpdate();
     }
 
-    async handleUpdate(current) {
+    async handleUpdate() {
 
-        this.model = new SustainableApplicationModel(current);
+        const { xml: current } = await this.modeler.saveXML(options);
+
+        let model = new SustainableApplicationModel(current)
 
         const {
             overall,
             services
-        } = await this.model.feedback;
+        } = await model.feedback;
 
         this.setState({
             feedback: overall
@@ -164,6 +160,18 @@ class App extends React.Component {
         };
     }
 
+    fetchMetadata = async () => {
+
+        const { xml: current } = await this.modeler.saveXML(options);
+        let model = new SustainableApplicationModel(current);
+
+        const services = await fetch('http://localhost/sustainability')
+            .then(response => response.json())
+            .then(response => response.endpoints);
+
+        this.importModel(await model.update(services));
+    }
+
     uploadModel = (event) => {
 
         const file = event.target.files[0];
@@ -172,7 +180,7 @@ class App extends React.Component {
         reader.readAsText(file, "UTF-8");
 
         reader.onload = async (event) => {
-            this.setState({ model: reader.result })
+            this.importModel(reader.result);
         }
 
         reader.onerror = function (event) {
@@ -230,9 +238,10 @@ class App extends React.Component {
                 <div className='canvas' id='js-canvas' ref={this.canvas} />
                 <div className='properties-panel' id='js-properties-panel' ref={this.propertiesPanel} />
                 <div className='button-container'>
-                    <Button className='upload-button' onClick={() => { document.getElementById('file-input').click() }}>Upload Model</Button>
+                    <Button className='upload-button' startEnhancer={() => <ArrowUp size={24} />} onClick={() => { document.getElementById('file-input').click() }}>Upload Model</Button>
                     <input id='file-input' type='file' accept='text/bpmn' onChange={this.uploadModel} hidden />
-                    <Button className='download-button' kind={KIND.secondary} onClick={this.downloadModel}>Download Model</Button>
+                    <Button className='download-button' startEnhancer={() => <ArrowDown size={24} />} kind={KIND.secondary} onClick={this.downloadModel}>Download Model</Button>
+                    <Button className='fetch-button' startEnhancer={() => <Upload size={24} />} onClick={this.fetchMetadata}>Fetch Metadata</Button>
                 </div>
                 <SustainabilityFeedback feedback={this.state.feedback} />
             </div>
