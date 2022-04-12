@@ -187,6 +187,8 @@ class App extends React.Component {
 
         const file = event.target.files[0];
 
+        event.target.value = null;
+
         let reader = new FileReader();
         reader.readAsText(file, "UTF-8");
 
