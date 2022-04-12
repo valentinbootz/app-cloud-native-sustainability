@@ -64,11 +64,7 @@ class App extends React.Component {
         this.modeler.createDiagram();
 
         this.modeler.on('elements.changed', HIGH_PRIORITY, (event) => {
-            event.preventDefault();
-            (async () => {
-                const { xml: current } = await this.modeler.saveXML(options);
-                this.handleUpdate(current);
-            })();
+            this.handleUpdate();
         })
 
         this.modeler.on('element.click', HIGH_PRIORITY, (event) => {
@@ -87,7 +83,10 @@ class App extends React.Component {
 
         const { xml: current } = await this.modeler.saveXML(options);
 
-        this.modeler.createDiagram();
+        this.modeler.destroy();
+
+        this.componentDidMount();
+
         try {
             const {
                 warnings
