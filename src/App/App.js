@@ -122,16 +122,24 @@ class App extends React.Component {
 
         let overlays = this.modeler.get('overlays');
 
-        for (const [id, service] of Object.entries(services)) {
+        for (const [identifier, service] of Object.entries(services)) {
+
+            let element = this.modeler.get('elementRegistry').find(element => element.businessObject.identifier == identifier);
+
+            if (typeof element === 'undefined') { break; }
+
+            let id = element.id;
+
             overlays.remove({ element: `${id}` });
 
             const {
-                ["optional metadata"]: optional,
-                ["execution modalities"]: modalities,
-                ["total requirements"]: requirements
+                optional,
+                modalities,
             } = service;
 
-            if (!optional) {
+            let optionalNote = !optional
+
+            if (optionalNote) {
                 overlays.add(`${id}`, 'optional-note', {
                     position: {
                         bottom: 0,
@@ -140,19 +148,23 @@ class App extends React.Component {
                 });
             }
 
-            if (!(modalities > 1)) {
+            let modalitiesNote = !(Object.keys(modalities).length)
+
+            if (modalitiesNote) {
                 overlays.add(`${id}`, 'execution-modalities-note', {
                     position: {
-                        bottom: optional ? 0 : -60,
+                        bottom: optionalNote ? -60 : 0,
                     },
                     html: `<div class='service-feedback execution-modalities-note'>Missing execution modalities metadata</div>`
                 });
             }
 
-            if (!(requirements > 1)) {
+            let requirementsNote = Object.values(modalities).some(value => Object.keys(value).length === 0)
+
+            if (requirementsNote) {
                 overlays.add(`${id}`, 'requirements-note', {
                     position: {
-                        bottom: (modalities > 1) ? (optional ? 0 : -60) : (optional ? -76 : -136),
+                        bottom: (modalitiesNote) ? (optionalNote ? -136 : -76) : (optionalNote ? -60 : 0),
                     },
                     html: `<div class='service-feedback requirements-note'>Missing requirements metadata</div>`
                 });
@@ -167,7 +179,7 @@ class App extends React.Component {
 
         const services = await fetch('http://localhost/sustainability')
             .then(response => response.json())
-            .then(response => response.endpoints);
+            .then(response => response.services);
 
         this.importModel(await model.update(services));
     }
