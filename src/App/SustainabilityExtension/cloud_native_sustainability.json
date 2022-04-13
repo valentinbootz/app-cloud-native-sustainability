@@ -66,6 +66,10 @@
           "name": "description",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "requirements",
+          "type": "bpmncns:ServiceRequirements"
         }
       ]
     },
@@ -89,6 +93,38 @@
         "bpmncns:ExecutionModality"
       ],
       "properties": []
+    },
+    {
+      "name": "ServiceRequirements",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "responseTime",
+          "type": "bpmncns:ResponseTimeRequirement"
+        }
+      ]
+    },
+    {
+      "name": "ServiceRequirement",
+      "superClass": [
+        "Element"
+      ],
+      "properties": []
+    },
+    {
+      "name": "ResponseTimeRequirement",
+      "superClass": [
+        "bpmncns:ServiceRequirement"
+      ],
+      "properties": [
+        {
+          "name": "value",
+          "isAttr": true,
+          "type": "Integer"
+        }
+      ]
     }
   ],
   "emumerations": [],
