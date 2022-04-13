@@ -1,3 +1,5 @@
+import './CustomPropertiesProvider.css'
+
 import {
   TextFieldEntry, isTextFieldEntryEdited,
   ToggleSwitchEntry, isToggleSwitchEntryEdited,
@@ -208,13 +210,14 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
 
     const getEntries = (element) => {
 
-      let id, name, description;
+      let id, name, description, requirements;
 
       if (typeof value === 'undefined') { }
       else ({
         id,
         name,
-        description
+        description,
+        requirements
       } = value);
 
       return [
@@ -232,6 +235,10 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
           id: 'description',
           component: <Description id='description-component' element={element} type={type} value={description} />,
           isEdited: isTextAreaEntryEdited
+        },
+        {
+          id: 'requirements-metadata',
+          component: <ServiceRequirementsMetadata id='requirements-metadata-component' element={element} type={type} value={requirements} />
         }
       ];
     }
@@ -341,7 +348,7 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
         values: []
       });
 
-      elements.$parent = element.businessObject;
+      elements.$parent = businessObject;
 
       commands.push({
         cmd: 'element.updateModdleProperties',
@@ -349,7 +356,7 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
           element,
           moddleElement: businessObject,
           properties: {
-            elements
+            extensionElements: elements
           }
         }
       });
@@ -369,11 +376,15 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
       current = {};
     }
 
-    let props = (({ id, name, description }) => ({ id, name, description }))({
+    let props = (({ id, name, description, requirements }) => ({ id, name, description, requirements }))({
       ...current, ...{
         [prop]: value
       }
     })
+
+    if (typeof value === 'undefined') {
+      delete props[prop];
+    }
 
     if (Object.values(props).some(prop => typeof prop !== 'undefined')) {
       modalities[type] = moddle.create(types[type], props);
@@ -394,7 +405,140 @@ export default function CustomPropertiesProvider(propertiesPanel, translate, mod
       }
     });
 
+    console.log(commands)
+
     commandStack.execute('properties-panel.multi-command-executor', commands);
+  }
+
+  function ServiceRequirementsMetadata(props) {
+    const { element, id, type, value } = props;
+
+    const translate = useService('translate');
+
+    const items = (() => {
+
+      let responseTime;
+
+      if (typeof value === 'undefined') { }
+      else ({
+        responseTime
+      } = value);
+
+      return [
+        {
+          id: 'response-time',
+          requirement: 'responseTime',
+          type: type,
+          element: element,
+          content: responseTime
+        }
+      ];
+    })();
+
+    const renderItem = (props) => {
+      const { element, id, requirement, type, content } = props;
+      return <ServiceRequirement id={id} requirement={requirement} type={type} element={element} content={content} />
+    }
+
+    const entry = <ListEntry
+      id={id}
+      element={element}
+      items={items}
+      renderItem={renderItem}
+      label={translate('Requirements')}
+      open={true}
+    />
+
+    return entry;
+  }
+
+  function ServiceRequirement(props) {
+    const { element, id, requirement, type, content } = props;
+
+    const entries = {
+      responseTime: <ResponseTime id={id} type={type} element={element} content={content} />
+    }
+
+    return entries[requirement];
+  }
+
+  function ResponseTime(props) {
+
+    const { element, id, type, content } = props;
+
+    const translate = useService('translate');
+
+    const getEntries = (element) => {
+
+      let value;
+      if (typeof content === 'undefined') { }
+      else ({
+        value
+      } = content);
+
+      return [
+        {
+          id: 'response-time-value',
+          component: <Value id='response-time-value-component' element={element} type={type} value={value} />,
+          isEdited: isTextFieldEntryEdited
+        }
+      ];
+    }
+
+    const entry = <CollapsibleEntry
+      id={id}
+      entries={getEntries(element)}
+      label={translate('Respone Time')}
+    />
+
+    return entry;
+  }
+
+  function Value(props) {
+    const { element, id, type, value } = props;
+
+    const translate = useService('translate');
+    const debounce = useService('debounceInput');
+    const commandStack = useService('commandStack');
+
+    const getValue = () => {
+      return value;
+    }
+
+    const setValue = value => {
+
+      let requirements;
+
+      if (typeof value !== 'undefined') {
+        let elements = element.businessObject.extensionElements;
+        if (typeof elements !== 'undefined') {
+          let modalities = elements.values.find(element => element.$type === "bpmncns:ExecutionModalities");
+          if (typeof modalities !== 'undefined') {
+            let modality = modalities[type];
+            if (typeof modality !== 'undefined') {
+              requirements = modality.requirements;
+            }
+          }
+        }
+        if (typeof requirements === 'undefined') {
+          requirements = moddle.create("bpmncns:ServiceRequirements", {});
+        }
+        requirements['responseTime'] = moddle.create("bpmncns:ResponseTimeRequirement", { value })
+      }
+      setPropByType(element, type, 'requirements', requirements, commandStack)
+    }
+
+    const entry = <TextFieldEntry
+      id={id}
+      element={element}
+      label={translate('Value')}
+      description={translate('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')}
+      getValue={getValue}
+      setValue={setValue}
+      debounce={debounce}
+    />
+
+    return entry;
   }
 }
 
