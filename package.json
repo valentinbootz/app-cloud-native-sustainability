@@ -26,7 +26,7 @@
   "scripts": {
     "start": "craco start",
     "build": "CI=false craco build",
-    "test": "craco test --transformIgnorePatterns",
+    "test": "craco test --transformIgnorePatterns --passWithNoTests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
