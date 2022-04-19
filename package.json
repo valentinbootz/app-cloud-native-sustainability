@@ -12,7 +12,7 @@
     "bpmn-js": "^9.0.3",
     "bpmn-js-properties-panel": "1.0.0-alpha.2",
     "chart.js": "^3.7.1",
-    "cloud-native-sustainability": "0.1.0",
+    "cloud-native-sustainability": "git+https://github.com/valentinbootz/cloud-native-sustainability.git",
     "preact": "^10.6.6",
     "react": "^17.0.2",
     "react-chartjs-2": "^4.0.1",
