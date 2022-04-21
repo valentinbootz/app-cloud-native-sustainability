@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+
+  # Cloud native sustainability app
+  app-cloud-native-sustainability:
+    container_name: "app-cloud-native-sustainability"
+    image: "valentinbootz/app-cloud-native-sustainability:latest"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /app/node_modules
+      - .:/app
+    ports:
+      - "3000:3000"
+  test-web-service:
+    container_name: "cloud-native-service"
+    image: "ghcr.io/apodini/sustainability:latest"
+    expose:
+      - "80"
+    command: [ "--port", "80", "--endpoint", "sustainability" ]
+    labels:
+      # The domain the service will respond to
+      - "traefik.http.routers.backend.rule=Host(`localhost`)"
+      # Allow request only from the predefined entry point named "web"
+      - "traefik.http.routers.backend.entrypoints=web"
+      # We need to define the a service and specify, on which port our server is reachable
+      - "traefik.http.services.backend-service.loadbalancer.server.port=80"
+      # We have to add this service to our router "backend". That's how the router knows where to forward the requests
+      - "traefik.http.routers.backend.service=backend-service"
+
+  # Reverse proxy to protect our service from direct access
+  traefik:
+    container_name: "traefik"
+    image: "traefik:v2.4"
+    command:
+      # Enabling docker provider
+      - "--providers.docker=true"
+      # Traefik will listen to incoming request on the port 80 (HTTP)
+      - "--entrypoints.web.address=:80"
+    ports:
+      # 80 on the container is mapped to 80 on the server/VM/your Machine.
+      - "80:80"
+    # Traefik needs the docker.sock to detect new docker container
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
