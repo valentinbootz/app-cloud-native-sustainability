@@ -1,0 +1,47 @@
+@import "bpmn-js/dist/assets/diagram-js.css";
+@import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+@import "bpmn-js-properties-panel/dist/assets/properties-panel.css";
+
+.canvas {
+    height: 100%;
+}
+
+.properties-panel {
+    width: 300px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    overflow: auto;
+    background-color: #f8f8f8;
+    border-left: 1px solid #ccc;
+}
+
+.button-container {
+    display: flex;
+    column-gap: 10px;
+    padding: 20px;
+    position: absolute;
+    bottom: 0;
+}
+
+.service-feedback {
+    width: 90px;
+    border-radius: 5px;
+    border: solid 2px #000;
+    margin-top: 5px;
+    padding: 5px;
+    font-size: small;
+}
+
+/* .optional-note {
+    background: rgba(255, 164, 46, 0.7);
+}
+
+.execution-modalities-note {
+    background: rgba(255, 164, 46, 0.7);
+}
+
+.requirements-note {
+    background: rgba(255, 164, 46, 0.7);
+} */

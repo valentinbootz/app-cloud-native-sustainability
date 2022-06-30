@@ -1,0 +1,3 @@
+.bio-properties-panel-list-entry::before {
+    all: unset;
+}
