@@ -1,70 +1,17 @@
-# Getting Started with Create React App
+# Cloud-Native Sustainability
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository includes a [React App](https://reactjs.org) for sustainable cloud-native application design that enables application designers to enrich business process models with additional sustainability-related information.
 
-## Available Scripts
+## Getting Started 
 
-In the project directory, you can run:
+The repository includes docker files and docker compose files to start and deploy the app and the `FlightBooking` web service. In addition, the repository includes a GitHub Action that builds a new docker image on every release and pushes the image to the GitHub package registry. You can start up the app at `http://localhost:3000` and the web service at `http://localhost` from published docker images by using `$ docker compose up` with the `docker-compose.yml` file. The `docker-compose-development.yml` file can be used to test the setup by building the app locally using `$ docker compose -f docker-compose-development.yml up`.
 
-### `npm start`
+The Flight Booking scenario shows the features of the app and the concepts of sustainable cloud-native application design:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The app includes a business process modeler to model a business process. Select `Upload Model` to upload the `FlightBooking.xml` from the repository or other business process models. Select the model elements for the services to see the properties panel and define service metadata. The versions of the `Flight Search` service are missing in the model from the `FlightBooking.xml` and the `Weather Information` service is not defined optional for the business process.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+<img width="1440" alt="Bildschirmfoto 2022-06-30 um 13 22 59" src="https://user-images.githubusercontent.com/97349551/176665467-f4bf52b2-53c7-4c7f-8738-76c338183d06.png">
 
-### `npm test`
+The `FlightBooking` [Apodini](https://github.com/Apodini/Apodini) web service includes sustainability-related metadata by using the [ApodiniSustainability](https://github.com/Apodini/ApodiniSustainability) package to annotate the web service and export the metadata from the web service. Select `Fetch Metadata` to fetch the metadata of the `FlightBooking` web service implementation from `http://localhost/sustainability`. This includes additional versions of the `Flight Search` service in the model and defines the `Weather Information` service optional for the business process. Select `Download Model` to see the metadata in the xml of the business process model.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<img width="1440" alt="Bildschirmfoto 2022-06-30 um 13 23 21" src="https://user-images.githubusercontent.com/97349551/176665533-3269d814-16a7-476d-9b97-48e184b962ee.png">
