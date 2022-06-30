@@ -10,4 +10,4 @@ jobs:
     name: Docker Build and Push
     uses: Apodini/.github/.github/workflows/docker-build-and-push.yml@v1.0.0
     with:
-      image-name: valentinbootz/app-cloud-native-sustainability
+      image-name: valentinbootz/cloud-native-sustainability
